@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const register = async (req, res) => {
   try {
@@ -14,7 +15,9 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Email already in use' });
     }
 
-    const user = await User.create({ email, password, firstName, lastName });
+    const password_hash = await bcrypt.hash(password, 10);
+
+    const user = await User.create({ email, password_hash, first_name: firstName, last_name: lastName });
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({ user, token });
